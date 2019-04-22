@@ -1,0 +1,24 @@
+{
+  "other": {
+    "name": "other",
+    "connector": "memory"
+  },
+  "db": {
+    "name": "db",
+    "host": "localhost",
+    "port": 27017,  
+    "database": "",
+    "username": "",
+    "password": "",
+    "connector": "mongodb",
+    "lazyConnect": true,
+    "autoReconnect": true,
+    "reconnectTries": 2000,
+    "reconnectInterval": 1000
+  },
+  "AuditTrail": {
+    "name": "",
+    "connector": "",
+    "baseURL": ""
+  }
+}

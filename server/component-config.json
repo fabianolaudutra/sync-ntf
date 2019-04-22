@@ -1,0 +1,18 @@
+{
+  "loopback-component-explorer": {
+    "mountPath": "/explorer",
+    "generateOperationScopedModels": true,
+    "apiInfo": {
+      "title": "SYNC- Notifications API",
+      "description": "Notifications and Webhooks for a bunch of channels like mailgun, slack, telegram and others",
+      "version": "--BUILD_VERSION--"
+    }
+  },
+  "loopback-component-remote-ctx": {
+    "enabled": true,
+    "argName": "remoteCtx",
+    "blackList": [
+      "User"
+    ]
+  }
+}

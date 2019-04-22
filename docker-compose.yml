@@ -1,0 +1,30 @@
+version: '2'
+
+volumes:
+  datamongo: {}
+services:
+  notifications-app:
+    image: sync-notifications:1.0
+    hostname: notifications-app
+    container_name: sync-notifications
+    environment:
+      - NODE_ENV=dev
+    ports:
+      - 3050:3050
+    expose:
+      - 3050
+  mongodb:
+    image: 
+    hostname: 
+    container_name: 
+    environment:
+      - TZ=America/Sao_Paulo
+      - SERVICE_NAME=
+      - SERVICE_TAGS=dev,
+    ports:
+      - 27017:27017
+    expose:
+      - 27017
+    volumes:
+      - ./datamongo:/data/db
+      - ./logs/mongodb:/var/log/

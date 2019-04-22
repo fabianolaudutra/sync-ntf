@@ -1,0 +1,62 @@
+{
+    "name": "AuditTrail",
+    "plural": "revisions",
+    "base": "PersistedModel",
+    "idInjection": true,
+    "options": {
+        "validateUpsert": true
+    },
+    "properties": {
+        "action": {
+            "type": "string",
+            "required": true,
+            "index": true
+        },
+        "table_name": {
+            "type": "string",
+            "required": true,
+            "index": true
+        },
+        "row_id": {
+            "type": "string",
+            "required": true
+        },
+        "old": {
+            "type": "Object"
+        },
+        "new": {
+            "type": "Object"
+        },
+        "user": {
+            "type": "string",
+            "required": false
+        },
+        "ip": {
+            "type": "string",
+            "required": true
+        },
+        "ip_forwarded": {
+            "type": "string",
+            "required": false
+        },
+        "created_at": {
+            "type": "date",
+            "required": false,
+            "index": true
+        }
+    },
+    "validations": [],
+    "relations": {},
+    "acls": [],
+    "methods": {},
+    "mixins": {
+        "DisableAllMethods": {
+            "expose": [
+                "create"
+            ]
+        },
+        "ResultsetLimit": {
+            "limit": 100
+        }
+    }
+}

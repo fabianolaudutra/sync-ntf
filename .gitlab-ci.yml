@@ -1,0 +1,122 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  CI_DEBUG_TRACE: "false"
+  PROJECT_NAME: notifications
+  GITLAB_URL: registry.gitlab.com
+  GITLAB_USER: ppl-project
+  GITLAB_PROJECT: backends
+  GITLAB_REGISTRY_URL: ${GITLAB_URL}/${GITLAB_USER}/${GITLAB_PROJECT}/${PROJECT_NAME}
+  BRANCH_NAME: ${CI_COMMIT_REF_NAME}
+  VERSION: "1.0"
+  TAG: ${VERSION}.${CI_PIPELINE_ID}
+
+build:
+  stage: build
+  tags:
+    - build
+    - shell
+  script:
+    - if [[ ${BRANCH_NAME} = "trunk" ]];
+        then
+          export ENV=dev;
+      elif [[ ${BRANCH_NAME} = "develop" ]]; 
+        then
+          export ENV=dev;
+      elif [[ ${BRANCH_NAME} = "staging" ]]; 
+        then
+          export ENV=staging;
+      elif [[ ${BRANCH_NAME} = "master" ]]; 
+        then 
+          export ENV=prd;
+      else
+        echo "Release branches are not configured for building yet";
+      fi
+    - sed -i.bak "s/--BUILD_VERSION--/${TAG}/g" server/component-config.json;
+    - docker login registry.gitlab.com -u ${GITLAB_USER} -p ${PAT}
+    - docker build --compress --force-rm -f Dockerfile -t ${GITLAB_REGISTRY_URL}/${ENV}/api:${TAG} -t ${GITLAB_REGISTRY_URL}/${ENV}/api:latest .
+    - docker push ${GITLAB_REGISTRY_URL}/${ENV}/api:${TAG}
+    - docker push ${GITLAB_REGISTRY_URL}/${ENV}/api:latest
+  only:
+    - master
+    - staging
+    - develop
+    - trunk
+
+cleanup_build_job:
+  stage: build
+  tags:
+    - build
+    - shell
+  script:
+    - echo y |docker system prune
+  when: always
+
+deploy_2_dev:
+  variables:
+    NODE_ENV: development
+  tags:
+    - deploy
+    - apps-1
+  stage: deploy
+  environment:
+    name: development
+    url: https://${PROJECT_NAME}-api.dev.pipeleap.com
+    on_stop: stop_dev
+  script:
+    - if [[ ${BRANCH_NAME} = "trunk" ]];
+        then
+          export ENV=dev;
+      elif [[ ${BRANCH_NAME} = "develop" ]]; 
+        then
+          export ENV=dev;
+      elif [[ ${BRANCH_NAME} = "staging" ]]; 
+        then
+          export ENV=staging;
+      elif [[ ${BRANCH_NAME} = "master" ]]; 
+        then 
+          export ENV=prd;
+      else
+        export DEPLOY=false;
+        echo "Release branches are not configured for deployment yet";
+      fi
+    - docker login ${GITLAB_URL} -u ${GITLAB_USER} -p ${PAT}
+    - docker pull ${GITLAB_REGISTRY_URL}/${ENV}/api:${TAG} 
+    - contrib/setup.sh ${PROJECT_NAME} ${ENV}
+    - cd /opt/${PROJECT_NAME}/run-env/${ENV}
+    - echo ${TAG} > tag.lock
+    - echo ${ENV} > env.lock
+    - echo ${GITLAB_REGISTRY_URL} > gitlab-registry.lock
+    - export GITLAB_REGISTRY_URL=${GITLAB_REGISTRY_URL}
+    - export TAG=${TAG}
+    - export ENV=${ENV}
+    - systemctl stop ${PROJECT_NAME}-${ENV}.service
+    - systemctl start ${PROJECT_NAME}-${ENV}.service
+    - systemctl status ${PROJECT_NAME}-${ENV}.service
+  when: on_success
+  only:
+    - develop
+    - trunk
+
+stop_dev:
+  stage: deploy
+  tags:
+    - deploy
+    - apps-1
+  script:
+    - systemctl stop notifications-dev
+  when: manual
+  environment:
+    name: development
+    action: stop
+
+cleanup_job:
+  stage: deploy
+  tags:
+    - deploy
+    - apps-1
+  script:
+    - echo y |docker system prune
+  when: always

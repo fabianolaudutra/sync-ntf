@@ -1,0 +1,101 @@
+{
+  "name": "message",
+  "plural": "messages",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "message": {
+      "type": "object",
+      "required": true
+    },
+    "level": {
+      "type": "string",
+      "required": true,
+      "default": "log"
+    },
+    "type": {
+      "type": "string",
+      "required": false
+    },
+    "channels": {
+      "type": "array",
+      "required": false
+    },
+    "raw_response": {
+      "type": "boolean",
+      "required": true,
+      "default": true
+    },
+    "webhook": {
+      "type": "string",
+      "required": false
+    },
+    "hasType": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
+    "hasChannels": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
+    "groups": {
+      "type": "array",
+      "required": false
+    },
+    "hasGroups": {
+      "type": "boolean",
+      "required": false
+    }
+
+  },
+      "mixins": {
+        "Auditz": {
+          "createdAt": "created_at",
+          "updatedAt": "updated_at",
+          "deletedAt": "deleted_at",
+          "createdBy": "created_by",
+          "updatedBy": "updated_by",
+          "deletedBy": "deleted_by",
+          "softDelete": true,
+          "unknownUser": 0,
+          "remoteCtx": "remoteCtx",
+          "scrub": false,
+          "required": false,
+          "validateUpsert": true,
+          "silenceWarnings": false,
+          "revisions": {
+            "name": "AuditTrail",
+            "idType": "String",
+            "dataSource": "db",
+            "autoUpdate": true
+          }
+        },
+        "DisableAllMethods": {
+          "expose": [
+            "dispatch",
+            "replaceById",
+            "deleteById",
+            "create",
+            "find",
+            "ping",
+            "findById",
+            "__link__parser",
+            "__get__parser",
+            "__findById__parser",
+            "count",
+            "getByUUID",
+            "stats",
+            "getKPIs"
+          ]
+        }
+      },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}
